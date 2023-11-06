@@ -20,7 +20,7 @@ s3Stream:
 store:
   kvPath: "/tmp/s3rocketmq/kvstore"
 db:
-  url: "jdbc:mysql://mysql-server:3306/metadata"
+  url: "jdbc:mysql://lizhanhui.dev:3306/metadata"
   userName: "root"
   password: "password"
 controller:
