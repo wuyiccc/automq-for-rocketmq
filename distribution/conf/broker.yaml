@@ -5,14 +5,18 @@ innerAccessKey: ""
 innerSecretKey: ""
 s3Stream:
   s3WALPath: "/tmp/s3rocketmq/wal"
-  s3Endpoint: "http://minio.local:9000"
-  s3Bucket: "bucket-name"
+  s3Endpoint: "http://minio.hellocorp.test"
+  s3Bucket: "lzh"
   s3Region: "us-east-1"
   s3ForcePathStyle: true
-  s3AccessKey: "access-key"
-  s3SecretKey: "secret-key"
+  s3AccessKey: "kicaSWtNBPf7XCCsdW8Z"
+  s3SecretKey: "dgWxasHBEQBBXxAxBpFmp4VWIoQ0XyDU3gGdFnaT"
   networkBaselineBandwidth: 5242880
   refillPeriodMs: 100
+  streamObjectCompactionIntervalMinutes: 1
+  streamObjectCompactionLivingTimeMinutes: 1
+  walObjectCompactionInterval: 1
+  walObjectCompactionForceSplitPeriod: 1
 store:
   kvPath: "/tmp/s3rocketmq/kvstore"
 db:
