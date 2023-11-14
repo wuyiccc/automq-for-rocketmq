@@ -22,6 +22,8 @@ import com.automq.stream.s3.metrics.operations.S3Operation;
 import com.automq.stream.s3.metrics.stats.OperationMetricsStats;
 import com.automq.stream.s3.model.StreamRecordBatch;
 import com.automq.stream.utils.biniarysearch.StreamRecordBatchList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +40,7 @@ import java.util.function.Consumer;
 import static com.automq.stream.s3.cache.LogCache.StreamRange.NOOP_OFFSET;
 
 public class LogCache {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogCache.class);
     public static final long MATCH_ALL_STREAMS = -1L;
     private static final int DEFAULT_MAX_BLOCK_STREAM_COUNT = 10000;
     private static final Consumer<LogCacheBlock> DEFAULT_BLOCK_FREE_LISTENER = block -> {
@@ -107,9 +110,27 @@ public class LogCache {
             OperationMetricsStats.getCounter(S3Operation.READ_STORAGE_LOG_CACHE).inc();
         } else {
             OperationMetricsStats.getCounter(S3Operation.READ_STORAGE_LOG_CACHE_MISS).inc();
+
+            //TODO: delete test code
+            logStreamOffset(streamId, startOffset, endOffset, maxBytes);
         }
         OperationMetricsStats.getHistogram(S3Operation.READ_STORAGE_LOG_CACHE).update(timerUtil.elapsed());
         return records;
+    }
+
+    private void logStreamOffset(long streamId, long startOffset, long endOffset, int maxBytes) {
+        long minOffset = Long.MAX_VALUE;
+        long maxOffset = Long.MIN_VALUE;
+        for (LogCacheBlock block : blocks) {
+            StreamRange streamRange = block.getStreamRange(streamId);
+            if (streamRange.startOffset == StreamRange.NOOP_OFFSET) {
+                continue;
+            }
+            minOffset = Math.min(minOffset, streamRange.startOffset);
+            maxOffset = Math.max(maxOffset, streamRange.endOffset);
+        }
+        LOGGER.info("[LogCache MISS] streamId: {}, get {}-{}, maxBytes: {}, cache: {}-{}",
+                streamId, startOffset, endOffset, maxBytes, minOffset, maxOffset);
     }
 
     public List<StreamRecordBatch> get0(long streamId, long startOffset, long endOffset, int maxBytes) {
