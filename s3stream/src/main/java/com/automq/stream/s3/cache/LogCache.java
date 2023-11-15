@@ -129,8 +129,8 @@ public class LogCache {
             minOffset = Math.min(minOffset, streamRange.startOffset);
             maxOffset = Math.max(maxOffset, streamRange.endOffset);
         }
-        LOGGER.info("[LogCache MISS] streamId: {}, get {}-{}, maxBytes: {}, cache: {}-{}",
-                streamId, startOffset, endOffset, maxBytes, minOffset, maxOffset);
+        LOGGER.info("[LogCache MISS] streamId: {}, get {}-{}, maxBytes: {}, cache: {}-{}, curr block num: {}, total size: {}",
+                streamId, startOffset, endOffset, maxBytes, minOffset, maxOffset, blocks.size(), size.get());
     }
 
     public List<StreamRecordBatch> get0(long streamId, long startOffset, long endOffset, int maxBytes) {
