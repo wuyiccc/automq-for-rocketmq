@@ -75,7 +75,7 @@ public class DefaultS3BlockCache implements S3BlockCache {
 
     @Override
     public CompletableFuture<ReadDataBlock> read(long streamId, long startOffset, long endOffset, int maxBytes) {
-        LOGGER.debug("[S3BlockCache] read data, stream={}, {}-{}, total bytes: {} ", streamId, startOffset, endOffset, maxBytes);
+        LOGGER.info("[S3BlockCache] read data, stream={}, {}-{}, total bytes: {} ", streamId, startOffset, endOffset, maxBytes);
         TimerUtil timerUtil = new TimerUtil();
         CompletableFuture<ReadDataBlock> readCf = new CompletableFuture<>();
         // submit read task to mainExecutor to avoid read slower the caller thread.
@@ -126,12 +126,12 @@ public class DefaultS3BlockCache implements S3BlockCache {
             nextMaxBytes -= Math.min(nextMaxBytes, cacheRecords.stream().mapToInt(StreamRecordBatch::size).sum());
             if (nextStartOffset >= endOffset || nextMaxBytes == 0) {
                 // cache hit
-                LOGGER.debug("[S3BlockCache] read data hit cache, stream={}, {}-{}, total bytes: {} ", streamId, startOffset, endOffset, maxBytes);
+                LOGGER.info("[S3BlockCache] read data hit cache, stream={}, {}-{}, total bytes: {} ", streamId, startOffset, endOffset, maxBytes);
                 asyncReadAhead(streamId, cacheRst.getReadAheadRecords());
                 return CompletableFuture.completedFuture(new ReadDataBlock(cacheRecords, CacheAccessType.BLOCK_CACHE_HIT));
             } else {
                 // cache partially hit
-                LOGGER.debug("[S3BlockCache] read data partially hit cache, stream={}, {}-{}, total bytes: {} ", streamId, nextStartOffset, endOffset, nextMaxBytes);
+                LOGGER.info("[S3BlockCache] read data partially hit cache, stream={}, {}-{}, total bytes: {} ", streamId, nextStartOffset, endOffset, nextMaxBytes);
                 return read0(streamId, nextStartOffset, endOffset, nextMaxBytes, true).thenApply(rst -> {
                     List<StreamRecordBatch> records = new ArrayList<>(cacheRecords);
                     records.addAll(rst.getRecords());
@@ -142,7 +142,7 @@ public class DefaultS3BlockCache implements S3BlockCache {
 
         // 2. get from s3
         //TODO: size of s3 read should be double of the size of round up value of read size to data block size
-        LOGGER.debug("[S3BlockCache] read data cache miss, stream={}, {}-{}, total bytes: {} ", streamId, startOffset, endOffset, maxBytes);
+        LOGGER.info("[S3BlockCache] read data cache miss, stream={}, {}-{}, total bytes: {} ", streamId, startOffset, endOffset, maxBytes);
         ReadContext context = new ReadContext(Collections.emptyList(), nextStartOffset, nextMaxBytes);
         CompletableFuture<List<S3ObjectMetadata>> getObjectsCf = objectManager.getObjects(streamId, nextStartOffset, endOffset, 2);
         return getObjectsCf.thenComposeAsync(objects -> {
@@ -160,7 +160,7 @@ public class DefaultS3BlockCache implements S3BlockCache {
 
     //TODO: optimize to parallel read
     private CompletableFuture<ReadDataBlock> readFromS3(long streamId, long endOffset, ReadContext context) {
-        LOGGER.debug("[S3BlockCache] read from s3, stream={}, {}-{}, total bytes: {} ", streamId, context.nextStartOffset, endOffset, context.nextMaxBytes);
+        LOGGER.info("[S3BlockCache] read from s3, stream={}, {}-{}, total bytes: {} ", streamId, context.nextStartOffset, endOffset, context.nextMaxBytes);
         CompletableFuture<Boolean /* empty objects */> getObjectsCf = CompletableFuture.completedFuture(false);
         if (context.objectIndex >= context.objects.size()) {
             getObjectsCf = objectManager
@@ -260,7 +260,7 @@ public class DefaultS3BlockCache implements S3BlockCache {
         int currRaSizeSum = readAheadRecords.stream().mapToInt(ReadAheadRecord::currRaSize).sum();
         int nextRaSize = Math.min(MAX_READ_AHEAD_SIZE, currRaSizeSum * 2);
 
-        LOGGER.debug("[S3BlockCache] async read ahead, stream={}, {}-{}, total bytes: {} ",
+        LOGGER.info("[S3BlockCache] async read ahead, stream={}, {}-{}, total bytes: {} ",
                 streamId, nextRaOffset, NOOP_OFFSET, nextRaSize);
 
         // check if next ra hits cache
