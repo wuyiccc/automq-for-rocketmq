@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  automq-for-rocketmq:
+  - apiVersion: v2
+    appVersion: 0.0.3
+    created: "2023-11-27T10:31:54.005649799Z"
+    description: A Helm chart for automq-for-rocketmq
+    digest: 556fdcdfb6793b2b249c577beb67295ae63afdbef495fee4e5123b5c1f7c19d3
+    name: automq-for-rocketmq
+    type: application
+    urls:
+    - https://github.com/AutoMQ/automq-for-rocketmq/releases/download/automq-for-rocketmq-0.0.3/automq-for-rocketmq-0.0.3.tgz
+    version: 0.0.3
+generated: "2023-11-27T10:31:54.005704621Z"
